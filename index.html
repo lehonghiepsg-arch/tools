@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Tools Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@300;400;600;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2eb;
+  --ink: #1a1812;
+  --card: #fff;
+  --border: #d8d3c8;
+  --accent: #e8501a;
+  --accent2: #1a6ee8;
+  --accent3: #18a852;
+  --muted: #8a8478;
+  --tag-bg: #ede9e0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+}
+
+/* Noise texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+/* ── HEADER ───────────────────────────── */
+header {
+  border-bottom: 2px solid var(--ink);
+  padding: 0 48px;
+  display: flex;
+  align-items: stretch;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+
+.header-brand {
+  padding: 20px 0;
+  border-right: 2px solid var(--ink);
+  padding-right: 32px;
+  margin-right: 32px;
+}
+
+.header-brand h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.header-brand h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.header-brand p {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.header-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+}
+
+.search-wrap input {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px 10px 38px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-wrap input:focus { border-color: var(--ink); }
+.search-wrap input::placeholder { color: var(--muted); }
+
+.search-icon {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 20px 0;
+}
+
+.tool-count-badge {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ── FILTER BAR ───────────────────────── */
+.filter-bar {
+  padding: 14px 48px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.filter-btn.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+/* ── MAIN GRID ────────────────────────── */
+.main {
+  padding: 40px 48px;
+}
+
+.section-title {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px;
+}
+
+/* ── TOOL CARD ────────────────────────── */
+.tool-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 0;
+  padding: 24px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  margin: -0.75px;
+}
+
+.tool-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 var(--ink);
+  border-color: var(--ink);
+  z-index: 2;
+}
+
+.tool-card.hidden { display: none; }
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.tool-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.tool-number {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--border);
+  letter-spacing: 1px;
+}
+
+.tool-name {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.tool-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tool-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--tag-bg);
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.tag.media   { background: #fde8e0; color: #c0401a; }
+.tag.text    { background: #e0eafd; color: #1a52c0; }
+.tag.data    { background: #e0fde8; color: #1a8040; }
+.tag.image   { background: #fdf6e0; color: #a07a1a; }
+.tag.dev     { background: #f0e0fd; color: #7a1ac0; }
+.tag.util    { background: #e8e8e8; color: #555; }
+
+.open-arrow {
+  font-size: 18px;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  color: var(--accent);
+}
+
+.tool-card:hover .open-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* ── ADD CARD ─────────────────────────── */
+.add-card {
+  border: 1.5px dashed var(--border);
+  border-radius: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 180px;
+  margin: -0.75px;
+}
+
+.add-card:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+
+.add-icon { font-size: 28px; }
+.add-text { font-size: 11px; letter-spacing: 0.5px; }
+
+/* ── EMPTY STATE ──────────────────────── */
+.empty-state {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 80px 40px;
+  color: var(--muted);
+  display: none;
+}
+
+.empty-state.show { display: block; }
+.empty-big { font-family: 'Unbounded', sans-serif; font-size: 48px; margin-bottom: 16px; }
+.empty-state p { font-size: 13px; }
+
+/* ── FOOTER ───────────────────────────── */
+footer {
+  border-top: 2px solid var(--ink);
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+footer strong { color: var(--ink); }
+
+/* ── MODAL ────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,24,18,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  width: 100%;
+  max-width: 480px;
+  padding: 32px;
+  position: relative;
+}
+
+.modal h2 {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.modal .close-btn {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none; border: none;
+  font-size: 20px; cursor: pointer;
+  color: var(--muted);
+}
+
+.form-field { margin-bottom: 16px; }
+.form-field label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--ink);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: var(--ink); }
+
+.form-field textarea { resize: vertical; min-height: 80px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.modal-btn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  padding: 13px;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.modal-btn:hover { opacity: 0.8; }
+
+/* ── RESPONSIVE ───────────────────────── */
+@media (max-width: 768px) {
+  header, .filter-bar, .main, footer { padding-left: 20px; padding-right: 20px; }
+  .header-brand { padding-right: 16px; margin-right: 16px; }
+  .header-brand h1 { font-size: 16px; }
+  .tools-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  .header-search { display: none; }
+}
+
+/* Animate cards in */
+.tool-card {
+  animation: slideUp 0.3s ease both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <h1>MY<em>TOOLS</em></h1>
+    <p>Personal Toolkit</p>
+  </div>
+  <div class="header-search">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Tìm kiếm tool..." oninput="filterTools()">
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="tool-count-badge" id="countBadge">0 tools</span>
+  </div>
+</header>
+
+<div class="filter-bar" id="filterBar">
+  <span class="filter-label">Lọc:</span>
+  <button class="filter-btn active" data-cat="all" onclick="setFilter('all',this)">Tất cả</button>
+  <button class="filter-btn" data-cat="media" onclick="setFilter('media',this)">📹 Media</button>
+  <button class="filter-btn" data-cat="text" onclick="setFilter('text',this)">📝 Text</button>
+  <button class="filter-btn" data-cat="image" onclick="setFilter('image',this)">🖼 Image</button>
+  <button class="filter-btn" data-cat="data" onclick="setFilter('data',this)">📊 Data</button>
+  <button class="filter-btn" data-cat="dev" onclick="setFilter('dev',this)">💻 Dev</button>
+  <button class="filter-btn" data-cat="util" onclick="setFilter('util',this)">🔧 Utility</button>
+</div>
+
+<main class="main">
+  <div class="section-title">Bộ sưu tập tools</div>
+
+  <div class="tools-grid" id="toolsGrid">
+
+    <!-- ── DEFAULT TOOLS (xóa/sửa tùy ý) ── -->
+    <a class="tool-card" href="video-frame-capture.html" target="_blank" data-cat="media" data-name="frame snapper video screenshot">
+      <div class="card-top">
+        <span class="tool-emoji">🎬</span>
+        <span class="tool-number">#001</span>
+      </div>
+      <div class="tool-name">Frame Snapper</div>
+      <div class="tool-desc">Chụp ảnh từ video tải lên. Hỗ trợ theo số lượng, khoảng thời gian, và chụp thủ công.</div>
+      <div class="card-footer">
+        <div class="tool-tags">
+          <span class="tag media">Media</span>
+          <span class="tag util">Video</span>
+        </div>
+        <span class="open-arrow">↗</span>
+      </div>
+    </a>
+
+    <!-- Placeholder tools — thay bằng tools thật của bạn -->
+    <a class="tool-card" href="#" data-cat="text" data-name="markdown editor text">
+      <div class="card-top"><span class="tool-emoji">📝</span><span class="tool-number">#002</span></div>
+      <div class="tool-name">Markdown Editor</div>
+      <div class="tool-desc">Viết và preview Markdown trực tiếp trên trình duyệt, export ra HTML hoặc PDF.</div>
+      <div class="card-footer">
+        <div class="tool-tags"><span class="tag text">Text</span></div>
+        <span class="open-arrow">↗</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="#" data-cat="image" data-name="image compressor resize">
+      <div class="card-top"><span class="tool-emoji">🖼</span><span class="tool-number">#003</span></div>
+      <div class="tool-name">Image Compressor</div>
+      <div class="tool-desc">Nén và resize ảnh hàng loạt, chọn chất lượng đầu ra, hỗ trợ JPEG/PNG/WebP.</div>
+      <div class="card-footer">
+        <div class="tool-tags"><span class="tag image">Image</span></div>
+        <span class="open-arrow">↗</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="#" data-cat="dev" data-name="json formatter validator beautify">
+      <div class="card-top"><span class="tool-emoji">💻</span><span class="tool-number">#004</span></div>
+      <div class="tool-name">JSON Formatter</div>
+      <div class="tool-desc">Format, validate và minify JSON. Highlight lỗi cú pháp, copy 1-click.</div>
+      <div class="card-footer">
+        <div class="tool-tags"><span class="tag dev">Dev</span><span class="tag util">JSON</span></div>
+        <span class="open-arrow">↗</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="#" data-cat="util" data-name="timer stopwatch countdown">
+      <div class="card-top"><span class="tool-emoji">⏱</span><span class="tool-number">#005</span></div>
+      <div class="tool-name">Timer & Stopwatch</div>
+      <div class="tool-desc">Đếm ngược, bấm giờ, Pomodoro timer. Báo động bằng âm thanh.</div>
+      <div class="card-footer">
+        <div class="tool-tags"><span class="tag util">Utility</span></div>
+        <span class="open-arrow">↗</span>
+      </div>
+    </a>
+
+    <!-- Add card -->
+    <div class="add-card" onclick="openModal()">
+      <div class="add-icon">＋</div>
+      <div class="add-text">Thêm tool mới</div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-big">🔍</div>
+      <p>Không tìm thấy tool nào khớp với "<span id="emptyQuery"></span>"</p>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span>MYTOOLS · Personal Toolkit · <strong id="footerCount">0</strong> tools</span>
+  <span>Built with Claude · Hosted on GitHub Pages</span>
+</footer>
+
+<!-- Add Tool Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2>Thêm Tool Mới</h2>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Emoji Icon</label>
+        <input type="text" id="newEmoji" value="🔧" maxlength="2">
+      </div>
+      <div class="form-field">
+        <label>Danh mục</label>
+        <select id="newCat">
+          <option value="media">📹 Media</option>
+          <option value="text">📝 Text</option>
+          <option value="image">🖼 Image</option>
+          <option value="data">📊 Data</option>
+          <option value="dev">💻 Dev</option>
+          <option value="util">🔧 Utility</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Tên Tool</label>
+      <input type="text" id="newName" placeholder="VD: Color Picker">
+    </div>
+    <div class="form-field">
+      <label>Mô tả ngắn</label>
+      <textarea id="newDesc" placeholder="Tool này làm gì?"></textarea>
+    </div>
+    <div class="form-field">
+      <label>File HTML (đặt cùng thư mục)</label>
+      <input type="text" id="newFile" placeholder="VD: color-picker.html">
+    </div>
+    <button class="modal-btn" onclick="addTool()">＋ Thêm vào danh sách</button>
+    <p style="font-size:10px;color:var(--muted);margin-top:12px;text-align:center">
+      ⚠ Sau khi thêm, copy đoạn HTML vào file index.html để lưu vĩnh viễn
+    </p>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────
+let activeFilter = 'all';
+let toolCount = 0;
+
+function countTools() {
+  toolCount = document.querySelectorAll('.tool-card').length;
+  document.getElementById('countBadge').textContent = toolCount + ' tools';
+  document.getElementById('footerCount').textContent = toolCount;
+}
+
+countTools();
+
+// ── Filter ───────────────────────────────
+function setFilter(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filterTools();
+}
+
+function filterTools() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const matchCat = activeFilter === 'all' || card.dataset.cat === activeFilter;
+    const matchSearch = !q || (card.dataset.name || '').includes(q) ||
+      card.querySelector('.tool-name').textContent.toLowerCase().includes(q) ||
+      card.querySelector('.tool-desc').textContent.toLowerCase().includes(q);
+    const show = matchCat && matchSearch;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  const empty = document.getElementById('emptyState');
+  empty.classList.toggle('show', visible === 0);
+  document.getElementById('emptyQuery').textContent = q;
+  document.getElementById('countBadge').textContent = visible + ' tools';
+}
+
+// ── Modal ────────────────────────────────
+function openModal() { document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function addTool() {
+  const emoji = document.getElementById('newEmoji').value || '🔧';
+  const cat   = document.getElementById('newCat').value;
+  const name  = document.getElementById('newName').value.trim();
+  const desc  = document.getElementById('newDesc').value.trim();
+  const file  = document.getElementById('newFile').value.trim();
+
+  if (!name) { alert('Vui lòng nhập tên tool!'); return; }
+
+  const grid = document.getElementById('toolsGrid');
+  const addCard = grid.querySelector('.add-card');
+  const newCard = document.createElement('a');
+  const num = String(toolCount + 1).padStart(3, '0');
+  newCard.className = 'tool-card';
+  newCard.href = file || '#';
+  newCard.target = '_blank';
+  newCard.dataset.cat = cat;
+  newCard.dataset.name = name.toLowerCase();
+  newCard.innerHTML = `
+    <div class="card-top">
+      <span class="tool-emoji">${emoji}</span>
+      <span class="tool-number">#${num}</span>
+    </div>
+    <div class="tool-name">${name}</div>
+    <div class="tool-desc">${desc || 'Không có mô tả.'}</div>
+    <div class="card-footer">
+      <div class="tool-tags"><span class="tag ${cat}">${cat.charAt(0).toUpperCase()+cat.slice(1)}</span></div>
+      <span class="open-arrow">↗</span>
+    </div>
+  `;
+  grid.insertBefore(newCard, addCard);
+  closeModal();
+  countTools();
+  filterTools();
+
+  // Show HTML snippet to copy
+  const snippet = newCard.outerHTML;
+  console.log('📋 Copy đoạn HTML này vào index.html:\n\n', snippet);
+  alert(`✅ Đã thêm "${name}"!\n\nMở Console (F12) để copy đoạn HTML lưu vĩnh viễn vào file index.html`);
+}
+</script>
+</body>
+</html>
