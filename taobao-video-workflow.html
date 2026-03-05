@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taobao → CapCut → Facebook Ads</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --surface2: #f3f0eb;
+  --border: #e8e2d9;
+  --ink: #1a1714;
+  --muted: #8a8278;
+  --accent: #c8522a;
+  --accent2: #e8a030;
+  --teal: #2a7a6a;
+  --rose: #b84060;
+  --blue: #2860c8;
+  --taobao: #e83020;
+  --capcut: #181818;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+/* GRAIN OVERLAY */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+/* HERO */
+.hero {
+  background: var(--ink);
+  color: #f5f0e8;
+  padding: 64px 52px 52px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -80px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,82,42,0.15) 0%, transparent 65%);
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 30%;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,160,48,0.08) 0%, transparent 65%);
+}
+
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+}
+.hero-eyebrow span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--accent2);
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--accent2);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 68px);
+  line-height: 1.08;
+  font-weight: 900;
+  margin-bottom: 8px;
+  position: relative; z-index: 1;
+}
+.hero h1 em {
+  color: var(--accent);
+  font-style: italic;
+}
+.hero-sub {
+  font-size: 15px;
+  color: #8a8070;
+  max-width: 460px;
+  font-weight: 300;
+  margin-top: 16px;
+  position: relative; z-index: 1;
+}
+
+.hero-flow {
+  display: flex; align-items: center; gap: 0;
+  margin-top: 36px;
+  flex-wrap: wrap;
+  gap: 4px;
+  position: relative; z-index: 1;
+}
+.flow-chip {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+}
+.chip-taobao { background: rgba(232,48,32,0.18); color: #ff8070; border: 1px solid rgba(232,48,32,0.25); }
+.chip-arrow { color: #444; font-size: 16px; padding: 0 4px; }
+.chip-claude { background: rgba(200,82,42,0.18); color: var(--accent); border: 1px solid rgba(200,82,42,0.25); }
+.chip-capcut { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.12); }
+.chip-fb { background: rgba(40,96,200,0.2); color: #80a8ff; border: 1px solid rgba(40,96,200,0.25); }
+
+/* STICKY NAV */
+.nav {
+  background: var(--ink);
+  display: flex; padding: 0 52px;
+  overflow-x: auto;
+  border-bottom: 1px solid #2a2520;
+  position: sticky; top: 0; z-index: 50;
+}
+.nav-btn {
+  padding: 15px 16px;
+  background: none; border: none;
+  color: #665e55;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.nav-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+.nav-btn:hover { color: #ccc; }
+
+/* SECTIONS */
+.section { display: none; }
+.section.active { display: block; animation: rise 0.3s ease; }
+@keyframes rise { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.container { max-width: 980px; margin: 0 auto; padding: 56px 52px; position: relative; z-index: 1; }
+
+/* SECTION HEAD */
+.sh { margin-bottom: 36px; }
+.sh-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.sh h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px; font-weight: 700;
+  line-height: 1.2;
+}
+.sh h2 em { color: var(--accent); font-style: italic; }
+
+/* CARD SYSTEM */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px 28px;
+  margin-bottom: 16px;
+}
+.card-l { border-left: 3px solid var(--accent); }
+.card-green { border-left: 3px solid var(--teal); }
+.card-blue { border-left: 3px solid var(--blue); }
+.card-rose { border-left: 3px solid var(--rose); }
+.card-amber { border-left: 3px solid var(--accent2); }
+
+.card h3 {
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card p { font-size: 14px; color: #5a544e; line-height: 1.7; margin-bottom: 8px; }
+.card p:last-child { margin: 0; }
+
+/* GRID */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:640px){ .g2,.g3 { grid-template-columns: 1fr; } }
+
+/* KEYWORD BOX */
+.kw-box {
+  background: #fff8f0;
+  border: 1px solid #f0e4d0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 14px 0;
+}
+.kw-box h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+.kw-list {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.kw {
+  background: white;
+  border: 1px solid #e8d8c0;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.kw:hover { background: var(--accent); color: white; border-color: var(--accent); }
+.kw.cn { color: var(--taobao); }
+
+/* SCRIPT BLOCK */
+.script-block {
+  background: var(--ink);
+  border-radius: 12px;
+  padding: 0;
+  margin: 14px 0;
+  overflow: hidden;
+}
+.script-header {
+  background: #2a2520;
+  padding: 10px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.script-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: #665e55;
+}
+.copy-btn {
+  background: none; border: 1px solid #3a3530;
+  color: #665e55;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 4px 12px; border-radius: 4px;
+  cursor: pointer; transition: all 0.15s;
+  letter-spacing: 1px;
+}
+.copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+.script-body {
+  padding: 18px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; line-height: 2;
+  color: #c8c0b4;
+}
+.script-body .t { color: var(--accent); }
+.script-body .g { color: #5dbf9a; }
+.script-body .y { color: var(--accent2); }
+.script-body .c { color: #554e48; }
+
+/* TIMELINE */
+.timeline { display: flex; flex-direction: column; }
+.tl-item {
+  display: flex; gap: 20px;
+  padding-bottom: 28px;
+  position: relative;
+}
+.tl-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 19px; top: 42px; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.tl-dot {
+  width: 38px; height: 38px; min-width: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  position: relative; z-index: 1;
+}
+.tl-dot.red { background: #fff0ee; border-color: #ffd0c8; }
+.tl-dot.orange { background: #fff8ee; border-color: #ffe0c0; }
+.tl-dot.green { background: #eef8f4; border-color: #c0e8d8; }
+.tl-dot.blue { background: #eef4ff; border-color: #c0d4f8; }
+.tl-body { flex: 1; padding-top: 4px; }
+.tl-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.tl-desc { font-size: 14px; color: #6a6460; line-height: 1.7; margin-bottom: 8px; }
+
+/* ALERT */
+.alert {
+  border-radius: 10px; padding: 14px 18px;
+  display: flex; gap: 12px;
+  font-size: 14px; margin: 16px 0;
+  align-items: flex-start;
+}
+.alert-icon { font-size: 18px; min-width: 22px; margin-top: 1px; }
+.alert strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.alert p { font-size: 13px; margin: 0; }
+.a-tip { background: #eef8f4; border: 1px solid #b8e8d4; color: #1a5a44; }
+.a-warn { background: #fff8ee; border: 1px solid #f8d8a0; color: #7a5010; }
+.a-info { background: #eef4ff; border: 1px solid #b8ccf8; color: #1a3880; }
+
+/* CHECKLIST */
+.cl { list-style: none; margin-top: 10px; }
+.cl li {
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+  font-size: 14px; color: #5a544e;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.cl li:last-child { border: none; }
+.cl li::before { content: '›'; color: var(--accent); font-weight: bold; min-width: 10px; font-size: 16px; line-height: 1.4; }
+
+/* MUSIC CARD */
+.music-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border-radius: 10px; margin-bottom: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+}
+.music-row:hover { background: white; border-color: var(--accent2); }
+.music-icon { font-size: 24px; min-width: 32px; }
+.music-info h5 { font-size: 14px; font-weight: 700; }
+.music-info p { font-size: 12px; color: var(--muted); margin: 0; }
+.music-tag {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 8px; border-radius: 4px;
+  font-weight: 600;
+}
+.mt-free { background: #eef8f4; color: var(--teal); }
+.mt-capcut { background: #f0f0f0; color: #444; }
+
+/* CAPTION TEMPLATE */
+.cap-template {
+  background: linear-gradient(135deg, #fff8f0, #fff4f8);
+  border: 1px solid #f0d8c8;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.cap-template:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(200,82,42,0.1); }
+.cap-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+.cap-text { font-size: 14px; color: #3a3430; line-height: 1.8; }
+.cap-copy { position: absolute; top: 14px; right: 16px; font-size: 11px; color: #ccc; font-family: 'JetBrains Mono', monospace; }
+.cap-template:hover .cap-copy { color: var(--accent); }
+
+/* SPEC TABLE */
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 14px; }
+th { padding: 10px 14px; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+td { padding: 12px 14px; border-bottom: 1px solid #f0ece4; color: #5a544e; }
+tr:last-child td { border: none; }
+td:first-child { font-weight: 600; color: var(--ink); }
+.yes { color: var(--teal); font-weight: 700; }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-family:'JetBrains Mono',monospace; font-weight:600; }
+.tag-red { background:#fff0ee; color:var(--accent); }
+.tag-green { background:#eef8f4; color:var(--teal); }
+
+.footer { text-align:center; padding:48px; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; border-top:1px solid var(--border); position:relative; z-index:1; }
+
+.toast { position:fixed; bottom:24px; right:24px; background:var(--ink); color:#f5f0e8; padding:10px 18px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:13px; opacity:0; transform:translateY(10px); transition:all 0.25s; pointer-events:none; z-index:999; }
+.toast.show { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow"><span>Quy trình làm video bán hàng</span></div>
+  <h1>Taobao → CapCut<br><em>→ Facebook Ads</em></h1>
+  <p class="hero-sub">Bộ công cụ đầy đủ: từ tìm video Taobao, viết script lồng tiếng, chọn nhạc đến caption quảng cáo — Claude hỗ trợ từng bước.</p>
+  <div class="hero-flow">
+    <div class="flow-chip chip-taobao">🛍️ Taobao</div>
+    <div class="chip-arrow">→</div>
+    <div class="flow-chip chip-claude">🤖 Claude</div>
+    <div class="chip-arrow">→</div>
+    <div class="flow-chip chip-capcut">🎬 CapCut</div>
+    <div class="chip-arrow">→</div>
+    <div class="flow-chip chip-fb">📱 FB Ads</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="go('taobao')">🔍 Tìm Video</button>
+  <button class="nav-btn" onclick="go('script')">🎙️ Script Lồng Tiếng</button>
+  <button class="nav-btn" onclick="go('music')">🎵 Chọn Nhạc</button>
+  <button class="nav-btn" onclick="go('capcut')">✂️ CapCut Tips</button>
+  <button class="nav-btn" onclick="go('caption')">📝 Caption & Ads</button>
+</div>
+
+<!-- ===== TAOBAO ===== -->
+<div class="section active" id="section-taobao">
+<div class="container">
+  <div class="sh">
+    <div class="sh-tag">Bước 01 — Tìm video</div>
+    <h2>Tìm video <em>đúng chuẩn</em> trên Taobao</h2>
+  </div>
+
+  <div class="card card-l">
+    <h3>🔑 Từ khóa tìm kiếm hiệu quả nhất</h3>
+    <p>Copy từ khóa tiếng Trung để dán thẳng vào thanh tìm kiếm Taobao:</p>
+    <div class="kw-box">
+      <h4>Đồ bộ trung niên — 中老年套装</h4>
+      <div class="kw-list">
+        <div class="kw cn" onclick="copyText('中老年套装', this)">中老年套装</div>
+        <div class="kw cn" onclick="copyText('妈妈装套装', this)">妈妈装套装</div>
+        <div class="kw cn" onclick="copyText('中老年棉麻套装', this)">中老年棉麻套装</div>
+        <div class="kw cn" onclick="copyText('中老年夏装套装两件套', this)">中老年夏装套装两件套</div>
+        <div class="kw cn" onclick="copyText('奶奶装时尚套装', this)">奶奶装时尚套装</div>
+        <div class="kw cn" onclick="copyText('中老年唐装套装', this)">中老年唐装套装</div>
+        <div class="kw cn" onclick="copyText('中老年运动套装', this)">中老年运动套装</div>
+        <div class="kw cn" onclick="copyText('妈妈宽松套装', this)">妈妈宽松套装</div>
+      </div>
+    </div>
+    <div class="kw-box" style="background:#f0f8ff; border-color:#d0e4f8; margin-top:10px;">
+      <h4 style="color:var(--blue);">Thêm từ "có video" — 有视频</h4>
+      <div class="kw-list">
+        <div class="kw cn" onclick="copyText('中老年套装 视频', this)">中老年套装 视频</div>
+        <div class="kw cn" onclick="copyText('妈妈装套装 模特视频', this)">妈妈装套装 模特视频</div>
+        <div class="kw cn" onclick="copyText('中老年套装 主图视频', this)">中老年套装 主图视频</div>
+      </div>
+    </div>
+    <p style="margin-top:10px; font-size:13px; color:var(--muted);">💡 Click vào từ khóa để copy. Sau đó paste vào Taobao.</p>
+  </div>
+
+  <div class="g2" style="margin-top:8px;">
+    <div class="card card-green">
+      <h3>✅ Video đáng dùng</h3>
+      <ul class="cl">
+        <li>Model mặc đứng/đi lại tự nhiên, ánh sáng tốt</li>
+        <li>Thấy rõ chất vải, đường may, màu sắc thực</li>
+        <li>Không có logo/watermark lớn che sản phẩm</li>
+        <li>Dài 15–45 giây (đủ để cut)</li>
+        <li>Góc quay đa dạng: toàn thân + chi tiết</li>
+        <li>Model trông tự nhiên, không quá trẻ so tuổi</li>
+      </ul>
+    </div>
+    <div class="card card-rose">
+      <h3>❌ Tránh những video này</h3>
+      <ul class="cl">
+        <li>Có phụ đề/chữ Trung che nhiều (khó edit)</li>
+        <li>Ánh sáng xanh/đỏ lạ, không thật màu vải</li>
+        <li>Model quá trẻ, không đúng đối tượng</li>
+        <li>Video blur, rung, chất lượng thấp</li>
+        <li>Có nhạc nền quá to (khó lồng tiếng mới)</li>
+        <li>Chỉ có 1 góc chụp duy nhất</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-amber" style="margin-top:8px;">
+    <h3>🤖 Nhờ Claude phân tích video Taobao</h3>
+    <p>Chụp màn hình trang sản phẩm Taobao, paste vào Claude và hỏi:</p>
+    <div class="script-block">
+      <div class="script-header">
+        <span class="script-title">Prompt phân tích video</span>
+        <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+      </div>
+      <div class="script-body">
+<span class="c"># Dán ảnh chụp màn hình + paste link vào Claude</span><br>
+"Tôi đang chọn video Taobao cho sản phẩm<br>
+<span class="t">đồ bộ trung niên</span> để chạy Facebook Ads.<br><br>
+Xem các video/ảnh này và đánh giá:<br>
+<span class="y">1.</span> Video nào phù hợp nhất để edit lại?<br>
+<span class="y">2.</span> Chất lượng ánh sáng, góc quay, model có ổn không?<br>
+<span class="y">3.</span> Có điểm gì cần lưu ý khi dùng video này?<br>
+<span class="g">Xếp hạng từ tốt nhất đến kém nhất."</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SCRIPT ===== -->
+<div class="section" id="section-script">
+<div class="container">
+  <div class="sh">
+    <div class="sh-tag">Bước 02 — Script lồng tiếng</div>
+    <h2>Viết script <em>bán hàng</em> tiếng Việt</h2>
+  </div>
+
+  <div class="alert a-tip">
+    <span class="alert-icon">💡</span>
+    <div>
+      <strong>Cách dùng Claude viết script:</strong>
+      <p>Mô tả sản phẩm (chất vải, màu, size, giá) + đối tượng khách (tuổi, sở thích) → Claude viết script hoàn chỉnh cho giọng đọc.</p>
+    </div>
+  </div>
+
+  <div class="card card-l">
+    <h3>📋 Prompt viết script — Dán vào Claude ngay</h3>
+    <div class="script-block">
+      <div class="script-header">
+        <span class="script-title">Prompt chuẩn — copy & điền thông tin</span>
+        <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+      </div>
+      <div class="script-body">
+"Viết script lồng tiếng cho video quảng cáo Facebook.<br><br>
+<span class="t">Thông tin sản phẩm:</span><br>
+- Tên: <span class="y">[đồ bộ lụa trung niên mango]</span><br>
+- Chất liệu: <span class="y">[lụa mango mềm mịn, thoáng mát]</span><br>
+- Màu sắc: <span class="y">[xanh ngọc, hồng phấn, be]</span><br>
+- Size: <span class="y">[M-3XL, phù hợp từ 50-75kg]</span><br>
+- Giá: <span class="y">[289.000đ]</span><br>
+- Điểm bán hàng: <span class="y">[mặc mát, không nhăn, dễ phối]</span><br><br>
+<span class="t">Đối tượng:</span> Phụ nữ 45-65 tuổi, thích thoải mái.<br><br>
+<span class="g">Yêu cầu script:</span><br>
+- Thời lượng: <span class="y">20–25 giây</span> khi đọc<br>
+- Giọng: <span class="y">thân thiện, gần gũi, không quá sales</span><br>
+- Cấu trúc: Hook (3s) → Giới thiệu (10s) → Lợi ích (7s) → CTA (5s)<br>
+- Viết 3 phiên bản khác nhau"
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">📌 Ví dụ script mẫu — 3 kiểu</h3>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot orange">😊</div>
+        <div class="tl-body">
+          <div class="tl-title">Script kiểu "Gần gũi" — Phổ biến nhất</div>
+          <div class="tl-desc">Giọng đọc như người quen giới thiệu, không cảm giác quảng cáo</div>
+          <div class="script-block">
+            <div class="script-header">
+              <span class="script-title">Script A — Gần gũi (22 giây)</span>
+              <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+            </div>
+            <div class="script-body">
+<span class="c">// HOOK (0–3s)</span><br>
+<span class="t">Mùa hè mà mặc đồ dính người, khó chịu lắm đúng không?</span><br><br>
+<span class="c">// GIỚI THIỆU (3–13s)</span><br>
+Bộ đồ lụa mango này mềm mịn, mát rượi —<br>
+mặc cả ngày không thấy nóng, không nhăn,<br>
+đi chợ hay đi chơi đều được.<br><br>
+<span class="c">// LỢI ÍCH (13–20s)</span><br>
+Size M đến 3XL, tôn dáng cho chị em từ 45 đến 75 ký.<br>
+Màu đẹp, giặt máy thoải mái.<br><br>
+<span class="c">// CTA (20–22s)</span><br>
+<span class="g">Nhắn tin ngay — hôm nay giá chỉ 289 ngàn thôi!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot red">⚡</div>
+        <div class="tl-body">
+          <div class="tl-title">Script kiểu "Urgency" — Tạo cảm giác gấp</div>
+          <div class="tl-desc">Hiệu quả khi chạy flash sale hoặc deal ngắn hạn</div>
+          <div class="script-block">
+            <div class="script-header">
+              <span class="script-title">Script B — Urgency (20 giây)</span>
+              <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+            </div>
+            <div class="script-body">
+<span class="c">// HOOK</span><br>
+<span class="t">Chị ơi! Bộ đồ bộ này chỉ còn hôm nay thôi!</span><br><br>
+<span class="c">// THÔNG TIN</span><br>
+Lụa mango cao cấp, mặc mát cả mùa hè.<br>
+Size đủ từ M đến 3XL — tôn dáng, che khuyết điểm.<br><br>
+<span class="c">// SOCIAL PROOF</span><br>
+Hơn 500 chị đã đặt tuần này, đánh giá 5 sao liên tục.<br><br>
+<span class="c">// CTA</span><br>
+<span class="g">Nhắn "BỘ" — em gửi ngay giá và hình thực tế!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot blue">💎</div>
+        <div class="tl-body">
+          <div class="tl-title">Script kiểu "Lợi ích sâu" — Tỷ lệ chuyển đổi cao</div>
+          <div class="tl-desc">Nói đúng nỗi đau, giải thích lợi ích cụ thể</div>
+          <div class="script-block">
+            <div class="script-header">
+              <span class="script-title">Script C — Lợi ích (25 giây)</span>
+              <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+            </div>
+            <div class="script-body">
+<span class="c">// HOOK — Đánh vào nỗi đau</span><br>
+<span class="t">Đồ bộ mặc nhà mà trông "bà già" quá — chị có thấy không?</span><br><br>
+<span class="c">// GIẢI PHÁP</span><br>
+Bộ lụa mango này khác hẳn — kiểu dáng thời trang,<br>
+trẻ trung mà vẫn thoải mái.<br><br>
+<span class="c">// ĐẶC ĐIỂM</span><br>
+Vải mềm mịn, không xù, không nhăn dù giặt máy nhiều lần.<br>
+Mặc đi chơi, đi chùa, hay chỉ ở nhà đều đẹp.<br><br>
+<span class="c">// CTA</span><br>
+<span class="g">Còn size, còn màu — nhắn "xem hàng" để em tư vấn nhé!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert a-warn">
+    <span class="alert-icon">⚠️</span>
+    <div>
+      <strong>Mẹo lồng tiếng:</strong>
+      <p>Đọc script với tốc độ tự nhiên trước khi thu âm. Script 20 giây thường đọc thoải mái hơn 25 giây. Tránh đọc quá nhanh — khách trung niên cần nghe rõ từng từ.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== MUSIC ===== -->
+<div class="section" id="section-music">
+<div class="container">
+  <div class="sh">
+    <div class="sh-tag">Bước 03 — Chọn nhạc</div>
+    <h2>Nhạc nền <em>phù hợp</em> cho đồ trung niên</h2>
+  </div>
+
+  <div class="alert a-info">
+    <span class="alert-icon">ℹ️</span>
+    <div>
+      <strong>Nguyên tắc chọn nhạc cho video bán hàng đồ trung niên:</strong>
+      <p>Nhạc nhẹ, giai điệu dễ chịu — KHÔNG dùng nhạc trẻ, beat mạnh. Âm lượng nhạc nền 20–30% so với giọng đọc.</p>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top: 20px;">
+    <div class="card card-green">
+      <h3>✅ Thể loại nên dùng</h3>
+      <ul class="cl">
+        <li><strong>Nhạc acoustic nhẹ nhàng</strong> — guitar, piano nhẹ</li>
+        <li><strong>Nhạc trữ tình Việt</strong> — không lời hoặc nhạc cụ</li>
+        <li><strong>Lo-fi nhẹ</strong> — vibe thoải mái, ấm áp</li>
+        <li><strong>Nhạc dân ca cách tân</strong> — gần gũi người trung niên</li>
+        <li><strong>Nhạc instrumental</strong> — êm, không phân tâm</li>
+      </ul>
+    </div>
+    <div class="card card-rose">
+      <h3>❌ Tránh những loại nhạc này</h3>
+      <ul class="cl">
+        <li>EDM, nhạc sôi động, beat mạnh</li>
+        <li>Nhạc có lời (cạnh tranh với giọng đọc)</li>
+        <li>Nhạc Trung Quốc (nghe biết dùng hàng TQ)</li>
+        <li>Nhạc quá buồn, ai oán</li>
+        <li>Nhạc có bản quyền rõ ràng (bị mute trên FB)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-amber" style="margin-top:16px;">
+    <h3>🎵 Nguồn nhạc miễn phí bản quyền</h3>
+    <div class="music-row">
+      <div class="music-icon">🎬</div>
+      <div class="music-info">
+        <h5>CapCut — Thư viện nhạc built-in</h5>
+        <p>Tìm: "gentle" / "soft" / "acoustic" / "morning" — hàng ngàn bản miễn phí</p>
+      </div>
+      <span class="music-tag mt-capcut">TRONG APP</span>
+    </div>
+    <div class="music-row">
+      <div class="music-icon">🎵</div>
+      <div class="music-info">
+        <h5>Pixabay Music — pixabay.com/music</h5>
+        <p>Tìm: "acoustic gentle" / "soft background" — tải về miễn phí, dùng thương mại được</p>
+      </div>
+      <span class="music-tag mt-free">FREE</span>
+    </div>
+    <div class="music-row">
+      <div class="music-icon">🎼</div>
+      <div class="music-info">
+        <h5>YouTube Audio Library</h5>
+        <p>studio.youtube.com → Audio Library → lọc "No attribution required"</p>
+      </div>
+      <span class="music-tag mt-free">FREE</span>
+    </div>
+    <div class="music-row">
+      <div class="music-icon">🎹</div>
+      <div class="music-info">
+        <h5>Facebook Sound Collection</h5>
+        <p>business.facebook.com → Creative Hub → Sound Collection — nhạc Facebook tự cấp phép</p>
+      </div>
+      <span class="music-tag mt-free">FB SAFE</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:8px;">
+    <h3>🤖 Nhờ Claude gợi ý nhạc</h3>
+    <div class="script-block">
+      <div class="script-header">
+        <span class="script-title">Prompt chọn nhạc</span>
+        <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+      </div>
+      <div class="script-body">
+"Tôi cần nhạc nền cho video quảng cáo Facebook:<br>
+- Sản phẩm: <span class="t">đồ bộ trung niên</span><br>
+- Đối tượng: <span class="t">phụ nữ 45–65 tuổi</span><br>
+- Cảm xúc video muốn tạo: <span class="y">ấm áp, thoải mái, tin tưởng</span><br>
+- Có lồng tiếng: <span class="g">CÓ</span> (nhạc chỉ là nền)<br><br>
+Gợi ý cho tôi:<br>
+1. Từ khóa tìm nhạc trên CapCut/Pixabay<br>
+2. Tempo phù hợp (BPM khoảng bao nhiêu?)<br>
+3. Cách điều chỉnh âm lượng nhạc vs giọng đọc"
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== CAPCUT ===== -->
+<div class="section" id="section-capcut">
+<div class="container">
+  <div class="sh">
+    <div class="sh-tag">Bước 04 — CapCut</div>
+    <h2>Edit video <em>nhanh & chuẩn</em> trên CapCut</h2>
+  </div>
+
+  <div class="card card-l">
+    <h3>⚙️ Cài đặt dự án chuẩn cho FB Ads</h3>
+    <table>
+      <tr><th>Thông số</th><th>Giá trị</th><th>Lý do</th></tr>
+      <tr><td>Tỷ lệ khung hình</td><td><span class="tag tag-green">9:16 (dọc)</span></td><td>Feed & Reels mobile</td></tr>
+      <tr><td>Tỷ lệ phụ</td><td><span class="tag tag-green">1:1 (vuông)</span></td><td>Feed Facebook desktop</td></tr>
+      <tr><td>Độ phân giải</td><td>1080 x 1920px</td><td>Đủ nét trên mobile</td></tr>
+      <tr><td>Frame rate</td><td>30fps</td><td>Mượt, file không quá lớn</td></tr>
+      <tr><td>Độ dài video</td><td>15–30 giây</td><td>Tối ưu cho FB Ads</td></tr>
+      <tr><td>Dung lượng xuất</td><td>< 30MB</td><td>Upload nhanh, ít buffering</td></tr>
+    </table>
+  </div>
+
+  <div class="g2" style="margin-top:16px;">
+    <div class="card card-green">
+      <h3>🎙️ Thêm lồng tiếng trong CapCut</h3>
+      <ul class="cl">
+        <li>Tab <strong>Audio → Voiceover</strong> → thu âm trực tiếp</li>
+        <li>Hoặc dùng <strong>Text-to-Speech</strong> (giọng Việt): tab Text → chọn giọng "Việt Nam nữ"</li>
+        <li>Sau khi thêm voice: giảm nhạc nền xuống 20–30%</li>
+        <li>Dùng <strong>Auto Caption</strong> để tạo phụ đề tự động</li>
+        <li>Chọn font chữ đậm, màu trắng viền đen cho phụ đề</li>
+      </ul>
+    </div>
+    <div class="card card-blue">
+      <h3>✂️ Kỹ thuật cắt ghép nhanh</h3>
+      <ul class="cl">
+        <li>Giữ mỗi cảnh 3–5 giây — không để quá dài</li>
+        <li>Cảnh đầu tiên: <strong>hook mạnh trong 3 giây đầu</strong></li>
+        <li>Dùng <strong>Smart cutout</strong> để xóa nền nếu cần</li>
+        <li>Thêm zoom nhẹ vào chi tiết vải để thấy chất liệu</li>
+        <li>Transition: dùng <strong>Fade</strong> hoặc <strong>Whip</strong> — không dùng hiệu ứng lòe loẹt</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-amber" style="margin-top:8px;">
+    <h3>🤖 Nhờ Claude viết text overlay cho CapCut</h3>
+    <div class="script-block">
+      <div class="script-header">
+        <span class="script-title">Prompt text overlay</span>
+        <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+      </div>
+      <div class="script-body">
+"Video của tôi dài <span class="t">25 giây</span>, quảng cáo đồ bộ trung niên.<br>
+Viết cho tôi <span class="y">5–7 dòng text overlay</span> xuất hiện theo cảnh:<br><br>
+- Cảnh 1 (0–3s): <span class="t">[text hook bắt mắt]</span><br>
+- Cảnh 2–3 (3–12s): <span class="t">[text giới thiệu tính năng]</span><br>
+- Cảnh 4 (12–20s): <span class="t">[text lợi ích/giá]</span><br>
+- Cảnh cuối (20–25s): <span class="t">[CTA rõ ràng]</span><br><br>
+Mỗi dòng tối đa <span class="g">6 chữ</span>, ngắn gọn, dễ đọc khi xem mobile."
+      </div>
+    </div>
+  </div>
+
+  <div class="alert a-tip">
+    <span class="alert-icon">💡</span>
+    <div>
+      <strong>Tip tiết kiệm thời gian:</strong>
+      <p>Lưu template trong CapCut sau khi edit xong video đầu tiên. Các video sau chỉ cần thay clip mới vào — âm thanh, text, nhạc giữ nguyên. Edit mỗi video chỉ còn 10–15 phút.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== CAPTION ===== -->
+<div class="section" id="section-caption">
+<div class="container">
+  <div class="sh">
+    <div class="sh-tag">Bước 05 — Caption & Chạy Ads</div>
+    <h2>Caption <em>bán hàng</em> hiệu quả</h2>
+  </div>
+
+  <div class="card card-l">
+    <h3>🤖 Prompt viết caption — Dán vào Claude</h3>
+    <div class="script-block">
+      <div class="script-header">
+        <span class="script-title">Prompt caption Facebook Ads</span>
+        <button class="copy-btn" onclick="copyBlock(this)">COPY</button>
+      </div>
+      <div class="script-body">
+"Viết caption Facebook Ads cho video đồ bộ trung niên.<br><br>
+<span class="t">Thông tin:</span><br>
+- Sản phẩm: <span class="y">[tên + chất liệu + màu sắc]</span><br>
+- Giá: <span class="y">[giá gốc] → [giá sale]</span> (nếu có)<br>
+- Freeship: <span class="y">[có/không]</span><br>
+- Liên hệ: <span class="y">[inbox / SĐT / link shop]</span><br><br>
+<span class="g">Viết 3 phiên bản caption:</span><br>
+1. Ngắn (3 dòng) — cho mobile feed<br>
+2. Trung bình (6–8 dòng) — có bullet điểm lợi ích<br>
+3. Có storytelling — kể câu chuyện ngắn<br><br>
+Thêm emoji phù hợp, CTA rõ ràng cuối mỗi caption."
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;">
+    <h3 style="font-size:15px; font-weight:700; margin-bottom:14px;">📋 Mẫu caption sẵn dùng — click để copy</h3>
+
+    <div class="cap-template" onclick="copyCaption(this)">
+      <div class="cap-label">Caption ngắn — Mobile feed</div>
+      <div class="cap-copy">copy</div>
+      <div class="cap-text">
+        🌸 Bộ lụa mango mát rượi — mặc cả ngày không nóng!<br>
+        ✅ Size M–3XL | Nhiều màu đẹp | Giặt máy thoải mái<br>
+        💬 Nhắn tin ngay — <strong>289.000đ</strong> freeship toàn quốc!
+      </div>
+    </div>
+
+    <div class="cap-template" onclick="copyCaption(this)">
+      <div class="cap-label">Caption trung bình — Có lợi ích</div>
+      <div class="cap-copy">copy</div>
+      <div class="cap-text">
+        👗 Chị ơi — mùa hè mà vẫn muốn mặc đẹp, thoải mái thì đây rồi!<br><br>
+        🧵 Bộ đồ lụa mango cao cấp:<br>
+        ✨ Mềm mịn, mát rượi cả ngày dài<br>
+        🎨 5 màu: xanh ngọc, hồng phấn, be, trắng, đen<br>
+        📏 Size M–3XL tôn dáng cho mọi vóc người<br>
+        🏷️ Giặt máy được, không nhăn, không xù<br><br>
+        💰 <strong>Chỉ 289.000đ</strong> — Freeship đơn từ 200k<br>
+        📩 Nhắn "ĐỒ BỘ" để xem thêm màu và hình thực tế nhé!
+      </div>
+    </div>
+
+    <div class="cap-template" onclick="copyCaption(this)">
+      <div class="cap-label">Caption storytelling — Cảm xúc</div>
+      <div class="cap-copy">copy</div>
+      <div class="cap-text">
+        Hôm qua khách nhắn: "Em ơi mình 60 tuổi mặc bộ này đi chùa, ai cũng khen trẻ ra 10 tuổi!" 🥹<br><br>
+        Đó là điều mình thích nhất khi bán đồ bộ lụa mango này —<br>
+        không chỉ mát mẻ, thoải mái mà còn thật sự <strong>đẹp và có duyên</strong>.<br><br>
+        🌺 Size M–3XL | 5 màu | 289k freeship<br>
+        💬 Nhắn tin mình tư vấn size và màu phù hợp nhé!
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-blue" style="margin-top:16px;">
+    <h3>🎯 Cài đặt Ads Manager cho video này</h3>
+    <table>
+      <tr><th>Cài đặt</th><th>Khuyến nghị</th></tr>
+      <tr><td>Mục tiêu chiến dịch</td><td>Tin nhắn (Messages) hoặc Chuyển đổi</td></tr>
+      <tr><td>Đối tượng tuổi</td><td>40–65 tuổi</td></tr>
+      <tr><td>Giới tính</td><td>Nữ</td></tr>
+      <tr><td>Vị trí địa lý</td><td>Việt Nam (loại trừ vùng núi xa nếu ship khó)</td></tr>
+      <tr><td>Placement</td><td>Facebook Feed + Reels (tắt Audience Network)</td></tr>
+      <tr><td>Budget test ban đầu</td><td>100–150k/ngày mỗi ad set</td></tr>
+      <tr><td>Thời gian test</td><td>3 ngày trước khi đánh giá</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<div class="footer">TAOBAO → CAPCUT → FACEBOOK ADS · ĐỒ BỘ TRUNG NIÊN · 2026</div>
+<div class="toast" id="toast">✓ Đã copy!</div>
+
+<script>
+function go(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function copyText(text, el) {
+  navigator.clipboard.writeText(text).then(() => {
+    el.style.background = 'var(--accent)';
+    el.style.color = 'white';
+    setTimeout(() => { el.style.background=''; el.style.color=''; }, 1000);
+    showToast();
+  });
+}
+function copyBlock(btn) {
+  const body = btn.closest('.script-block').querySelector('.script-body');
+  const text = body.innerText.replace(/\/\/ .+/g, '').replace(/^\s*[\r\n]/gm, '\n').trim();
+  navigator.clipboard.writeText(text).then(showToast);
+}
+function copyCaption(el) {
+  const text = el.querySelector('.cap-text').innerText;
+  navigator.clipboard.writeText(text).then(showToast);
+}
+</script>
+</body>
+</html>
