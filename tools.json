@@ -1,0 +1,42 @@
+[
+  {
+    "emoji": "🎬",
+    "name": "Frame Snapper",
+    "desc": "Chụp ảnh từ video tải lên. Hỗ trợ theo số lượng, khoảng thời gian, và chụp thủ công.",
+    "file": "video-frame-capture.html",
+    "cat": "media",
+    "tags": ["Media", "Video"]
+  },
+  {
+    "emoji": "📝",
+    "name": "Markdown Editor",
+    "desc": "Viết và preview Markdown trực tiếp trên trình duyệt, export ra HTML hoặc PDF.",
+    "file": "markdown-editor.html",
+    "cat": "text",
+    "tags": ["Text"]
+  },
+  {
+    "emoji": "🖼",
+    "name": "Image Compressor",
+    "desc": "Nén và resize ảnh hàng loạt, chọn chất lượng đầu ra, hỗ trợ JPEG/PNG/WebP.",
+    "file": "image-compressor.html",
+    "cat": "image",
+    "tags": ["Image"]
+  },
+  {
+    "emoji": "💻",
+    "name": "JSON Formatter",
+    "desc": "Format, validate và minify JSON. Highlight lỗi cú pháp, copy 1-click.",
+    "file": "json-formatter.html",
+    "cat": "dev",
+    "tags": ["Dev", "JSON"]
+  },
+  {
+    "emoji": "⏱",
+    "name": "Timer & Stopwatch",
+    "desc": "Đếm ngược, bấm giờ, Pomodoro timer. Báo động bằng âm thanh.",
+    "file": "timer.html",
+    "cat": "util",
+    "tags": ["Utility"]
+  }
+]

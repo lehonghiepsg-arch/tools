@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Tools Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@300;400;600;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2eb;
+  --ink: #1a1812;
+  --card: #fff;
+  --border: #d8d3c8;
+  --accent: #e8501a;
+  --accent2: #1a6ee8;
+  --muted: #8a8478;
+  --tag-bg: #ede9e0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+/* HEADER */
+header {
+  border-bottom: 2px solid var(--ink);
+  padding: 0 48px;
+  display: flex;
+  align-items: stretch;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+
+.header-brand { padding: 20px 32px 20px 0; border-right: 2px solid var(--ink); margin-right: 32px; }
+.header-brand h1 { font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 22px; letter-spacing: -1px; line-height: 1; }
+.header-brand h1 em { font-style: normal; color: var(--accent); }
+.header-brand p { font-size: 10px; color: var(--muted); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+.header-search { flex: 1; display: flex; align-items: center; }
+.search-wrap { position: relative; flex: 1; max-width: 380px; }
+.search-wrap input {
+  width: 100%; background: transparent; border: 1.5px solid var(--border);
+  border-radius: 6px; padding: 10px 14px 10px 38px;
+  font-family: 'Space Mono', monospace; font-size: 13px; color: var(--ink);
+  outline: none; transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--ink); }
+.search-wrap input::placeholder { color: var(--muted); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; opacity: 0.5; }
+
+.header-meta { display: flex; align-items: center; margin-left: auto; padding: 20px 0; gap: 10px; }
+.tool-count-badge { background: var(--ink); color: var(--bg); border-radius: 20px; padding: 6px 14px; font-size: 11px; font-weight: 700; }
+
+.edit-toggle {
+  background: transparent; border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 6px 14px; font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--muted); cursor: pointer; transition: all 0.2s;
+}
+.edit-toggle:hover, .edit-toggle.active { border-color: var(--accent2); color: var(--accent2); background: rgba(26,110,232,0.07); }
+
+/* FILTER BAR */
+.filter-bar { padding: 14px 48px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.filter-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-right: 4px; }
+.filter-btn { background: transparent; border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover { border-color: var(--ink); color: var(--ink); }
+.filter-btn.active { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+/* MAIN */
+.main { padding: 40px 48px; }
+
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.section-title { font-family: 'Unbounded', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 12px; flex: 1; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.json-hint { display: none; align-items: center; gap: 8px; background: rgba(26,110,232,0.08); border: 1px solid rgba(26,110,232,0.2); border-radius: 8px; padding: 8px 14px; font-size: 11px; color: var(--accent2); margin-left: 24px; }
+.json-hint.show { display: flex; }
+.json-hint code { background: rgba(26,110,232,0.12); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+
+/* GRID */
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2px; }
+
+/* TOOL CARD */
+.tool-card {
+  background: var(--card); border: 1.5px solid var(--border); padding: 24px;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative; text-decoration: none; color: inherit; display: block;
+  margin: -0.75px; animation: slideUp 0.3s ease both;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.tool-card:hover { transform: translate(-3px, -3px); box-shadow: 5px 5px 0 var(--ink); border-color: var(--ink); z-index: 2; }
+.tool-card.hidden { display: none; }
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.tool-emoji { font-size: 32px; line-height: 1; }
+.tool-number { font-family: 'Unbounded', sans-serif; font-size: 10px; font-weight: 900; color: var(--border); letter-spacing: 1px; }
+.tool-name { font-family: 'Unbounded', sans-serif; font-weight: 600; font-size: 15px; line-height: 1.2; margin-bottom: 8px; letter-spacing: -0.3px; }
+.tool-desc { font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.tool-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.tag { background: var(--tag-bg); border-radius: 3px; padding: 3px 8px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); font-weight: 700; }
+.tag.media { background: #fde8e0; color: #c0401a; }
+.tag.text  { background: #e0eafd; color: #1a52c0; }
+.tag.data  { background: #e0fde8; color: #1a8040; }
+.tag.image { background: #fdf6e0; color: #a07a1a; }
+.tag.dev   { background: #f0e0fd; color: #7a1ac0; }
+.tag.util  { background: #e8e8e8; color: #555; }
+
+.open-arrow { font-size: 18px; opacity: 0; transition: opacity 0.15s, transform 0.15s; color: var(--accent); }
+.tool-card:hover .open-arrow { opacity: 1; transform: translate(2px, -2px); }
+
+/* Edit button on card */
+.card-edit-btn {
+  display: none; position: absolute; top: 10px; right: 10px;
+  background: var(--ink); color: var(--bg); border: none; border-radius: 4px;
+  padding: 4px 8px; font-size: 11px; cursor: pointer; z-index: 5;
+  font-family: 'Space Mono', monospace;
+}
+body.edit-mode .card-edit-btn { display: block; }
+body.edit-mode .tool-card:hover { transform: none; box-shadow: none; }
+body.edit-mode .open-arrow { display: none; }
+
+/* ADD CARD */
+.add-card {
+  border: 1.5px dashed var(--border); padding: 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; color: var(--muted); cursor: pointer; transition: all 0.15s;
+  min-height: 180px; margin: -0.75px; background: transparent;
+}
+.add-card:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* EMPTY */
+.empty-state { grid-column: 1/-1; text-align: center; padding: 80px 40px; color: var(--muted); display: none; }
+.empty-state.show { display: block; }
+.empty-big { font-family: 'Unbounded', sans-serif; font-size: 48px; margin-bottom: 16px; }
+
+/* FOOTER */
+footer { border-top: 2px solid var(--ink); padding: 20px 48px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--muted); }
+footer strong { color: var(--ink); }
+footer a { color: var(--accent2); text-decoration: none; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,24,18,0.75); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.show { display: flex; }
+.modal { background: var(--bg); border: 2px solid var(--ink); width: 100%; max-width: 500px; padding: 32px; position: relative; max-height: 90vh; overflow-y: auto; }
+.modal h2 { font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 18px; margin-bottom: 4px; }
+.modal-sub { font-size: 11px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+.close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+
+.form-field { margin-bottom: 14px; }
+.form-field label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
+.form-field input, .form-field select, .form-field textarea {
+  width: 100%; background: var(--card); border: 1.5px solid var(--border); color: var(--ink);
+  border-radius: 4px; padding: 10px 12px; font-family: 'Space Mono', monospace;
+  font-size: 13px; outline: none; transition: border-color 0.2s;
+}
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--ink); }
+.form-field textarea { resize: vertical; min-height: 72px; }
+.form-row { display: grid; grid-template-columns: 80px 1fr; gap: 12px; }
+
+.modal-btn { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: 4px; padding: 13px; font-family: 'Unbounded', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+.modal-btn:hover { opacity: 0.8; }
+.modal-btn.danger { background: #c0401a; }
+
+/* JSON output */
+.json-box {
+  background: #1a1812; color: #e8ff5a; border-radius: 6px; padding: 14px 14px 14px 14px;
+  font-size: 11px; line-height: 1.6; margin-top: 16px; white-space: pre-wrap;
+  word-break: break-all; max-height: 180px; overflow-y: auto;
+  display: none; position: relative;
+}
+.copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); border: none; color: #e8ff5a; border-radius: 4px; padding: 4px 10px; font-size: 10px; cursor: pointer; font-family: 'Space Mono', monospace; }
+.json-msg { display: none; font-size: 11px; color: var(--accent2); margin-top: 8px; text-align: center; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  header, .filter-bar, .main, footer { padding-left: 20px; padding-right: 20px; }
+  .header-brand { padding-right: 16px; margin-right: 16px; }
+  .header-brand h1 { font-size: 16px; }
+  .tools-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  .header-search { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <h1>MY<em>TOOLS</em></h1>
+    <p>Personal Toolkit</p>
+  </div>
+  <div class="header-search">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Tìm kiếm tool..." oninput="renderAll()">
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="tool-count-badge" id="countBadge">0 tools</span>
+    <button class="edit-toggle" id="editToggle" onclick="toggleEditMode()">✏ Chỉnh sửa</button>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">Lọc:</span>
+  <button class="filter-btn active" onclick="setFilter('all',this)">Tất cả</button>
+  <button class="filter-btn" onclick="setFilter('media',this)">📹 Media</button>
+  <button class="filter-btn" onclick="setFilter('text',this)">📝 Text</button>
+  <button class="filter-btn" onclick="setFilter('image',this)">🖼 Image</button>
+  <button class="filter-btn" onclick="setFilter('data',this)">📊 Data</button>
+  <button class="filter-btn" onclick="setFilter('dev',this)">💻 Dev</button>
+  <button class="filter-btn" onclick="setFilter('util',this)">🔧 Utility</button>
+</div>
+
+<main class="main">
+  <div class="section-header">
+    <div class="section-title">Bộ sưu tập tools</div>
+    <div class="json-hint" id="jsonHint">
+      ✏ Chỉnh sửa <code>tools.json</code> để thêm/xóa tool
+    </div>
+  </div>
+  <div class="tools-grid" id="toolsGrid">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-big">📭</div>
+      <p>Đang tải tools...</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>MYTOOLS · <strong id="footerCount">0</strong> tools · <a href="tools.json" target="_blank">tools.json ↗</a></span>
+  <span>Built with Claude · GitHub Pages</span>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h2 id="modalTitle">Thêm Tool Mới</h2>
+    <p class="modal-sub">
+      Sau khi lưu → copy nội dung JSON bên dưới → paste vào file <strong>tools.json</strong> trên GitHub → commit.
+    </p>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Emoji</label>
+        <input type="text" id="fEmoji" value="🔧" maxlength="2">
+      </div>
+      <div class="form-field">
+        <label>Danh mục</label>
+        <select id="fCat">
+          <option value="media">📹 Media</option>
+          <option value="text">📝 Text</option>
+          <option value="image">🖼 Image</option>
+          <option value="data">📊 Data</option>
+          <option value="dev">💻 Dev</option>
+          <option value="util">🔧 Utility</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Tên Tool</label>
+      <input type="text" id="fName" placeholder="VD: Color Picker">
+    </div>
+    <div class="form-field">
+      <label>Mô tả ngắn</label>
+      <textarea id="fDesc" placeholder="Tool này làm gì?"></textarea>
+    </div>
+    <div class="form-field">
+      <label>File HTML (cùng thư mục với index.html)</label>
+      <input type="text" id="fFile" placeholder="VD: color-picker.html">
+    </div>
+    <div class="form-field">
+      <label>Tags (phân cách bằng dấu phẩy)</label>
+      <input type="text" id="fTags" placeholder="VD: Media, Video">
+    </div>
+
+    <button class="modal-btn" onclick="saveTool()">💾 Lưu &amp; Tạo JSON</button>
+    <button class="modal-btn danger" id="deleteBtn" onclick="deleteTool()" style="display:none">🗑 Xóa tool này</button>
+
+    <div class="json-box" id="jsonBox">
+      <button class="copy-btn" onclick="copyJSON()">Copy</button><span id="jsonText"></span>
+    </div>
+    <p class="json-msg" id="jsonMsg">✅ Đã copy! Paste vào <strong>tools.json</strong> trên GitHub rồi commit.</p>
+  </div>
+</div>
+
+<script>
+let tools = [];
+let activeFilter = 'all';
+let editIdx = -1;
+
+// ── Load ────────────────────────────────
+async function loadTools() {
+  try {
+    const r = await fetch('tools.json?v=' + Date.now());
+    tools = await r.json();
+  } catch(e) {
+    tools = [];
+    document.getElementById('emptyState').querySelector('p').textContent = 'Không tìm thấy tools.json';
+    document.getElementById('emptyState').classList.add('show');
+  }
+  renderAll();
+}
+
+// ── Render ──────────────────────────────
+function renderAll() {
+  const grid = document.getElementById('toolsGrid');
+  grid.querySelectorAll('.tool-card,.add-card').forEach(el => el.remove());
+
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let visible = 0;
+
+  tools.forEach((t, i) => {
+    const matchCat = activeFilter === 'all' || t.cat === activeFilter;
+    const matchQ = !q || t.name.toLowerCase().includes(q) || (t.desc||'').toLowerCase().includes(q);
+    if (!matchCat || !matchQ) return;
+
+    const card = document.createElement('a');
+    card.className = 'tool-card';
+    card.href = t.file || '#';
+    card.target = t.file ? '_blank' : '_self';
+    card.style.animationDelay = (visible * 35) + 'ms';
+
+    const tags = (t.tags?.length ? t.tags : [cat2label(t.cat)])
+      .map(tag => `<span class="tag ${t.cat}">${tag}</span>`).join('');
+
+    card.innerHTML = `
+      <button class="card-edit-btn" onclick="event.preventDefault();event.stopPropagation();openEdit(${i})">✏ Sửa</button>
+      <div class="card-top">
+        <span class="tool-emoji">${t.emoji||'🔧'}</span>
+        <span class="tool-number">#${String(i+1).padStart(3,'0')}</span>
+      </div>
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-desc">${t.desc||''}</div>
+      <div class="card-footer">
+        <div class="tool-tags">${tags}</div>
+        <span class="open-arrow">↗</span>
+      </div>`;
+    grid.appendChild(card);
+    visible++;
+  });
+
+  // Add card
+  const add = document.createElement('div');
+  add.className = 'add-card';
+  add.innerHTML = '<div style="font-size:28px">＋</div><div style="font-size:11px">Thêm tool mới</div>';
+  add.onclick = openAdd;
+  grid.appendChild(add);
+
+  const empty = document.getElementById('emptyState');
+  empty.classList.toggle('show', visible === 0 && q !== '');
+  if (visible === 0 && q === '' && tools.length === 0) {
+    empty.querySelector('p').textContent = 'Chưa có tool nào. Nhấn ＋ để thêm!';
+    empty.classList.add('show');
+  }
+
+  document.getElementById('countBadge').textContent = visible + ' tools';
+  document.getElementById('footerCount').textContent = tools.length;
+}
+
+function cat2label(c) {
+  return {media:'Media',text:'Text',image:'Image',data:'Data',dev:'Dev',util:'Utility'}[c]||c;
+}
+
+// ── Filter ──────────────────────────────
+function setFilter(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderAll();
+}
+
+// ── Edit mode ───────────────────────────
+function toggleEditMode() {
+  document.body.classList.toggle('edit-mode');
+  const on = document.body.classList.contains('edit-mode');
+  const btn = document.getElementById('editToggle');
+  btn.classList.toggle('active', on);
+  btn.textContent = on ? '✓ Xong' : '✏ Chỉnh sửa';
+  document.getElementById('jsonHint').classList.toggle('show', on);
+}
+
+// ── Modal ───────────────────────────────
+function openAdd() {
+  editIdx = -1;
+  document.getElementById('modalTitle').textContent = 'Thêm Tool Mới';
+  document.getElementById('fEmoji').value = '🔧';
+  document.getElementById('fName').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fFile').value = '';
+  document.getElementById('fTags').value = '';
+  document.getElementById('fCat').value = 'util';
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('jsonBox').style.display = 'none';
+  document.getElementById('jsonMsg').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function openEdit(i) {
+  editIdx = i;
+  const t = tools[i];
+  document.getElementById('modalTitle').textContent = 'Sửa Tool';
+  document.getElementById('fEmoji').value = t.emoji||'🔧';
+  document.getElementById('fName').value = t.name||'';
+  document.getElementById('fDesc').value = t.desc||'';
+  document.getElementById('fFile').value = t.file||'';
+  document.getElementById('fTags').value = (t.tags||[]).join(', ');
+  document.getElementById('fCat').value = t.cat||'util';
+  document.getElementById('deleteBtn').style.display = 'block';
+  document.getElementById('jsonBox').style.display = 'none';
+  document.getElementById('jsonMsg').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function saveTool() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { alert('Nhập tên tool!'); return; }
+  const tool = {
+    emoji: document.getElementById('fEmoji').value||'🔧',
+    name,
+    desc: document.getElementById('fDesc').value.trim(),
+    file: document.getElementById('fFile').value.trim(),
+    cat: document.getElementById('fCat').value,
+    tags: document.getElementById('fTags').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if (editIdx === -1) tools.push(tool);
+  else tools[editIdx] = tool;
+  renderAll();
+  showJSON();
+}
+
+function deleteTool() {
+  if (!confirm(`Xóa "${tools[editIdx].name}"?`)) return;
+  tools.splice(editIdx, 1);
+  renderAll();
+  showJSON();
+}
+
+function showJSON() {
+  const json = JSON.stringify(tools, null, 2);
+  const box = document.getElementById('jsonBox');
+  document.getElementById('jsonText').textContent = json;
+  box.style.display = 'block';
+  document.getElementById('jsonMsg').style.display = 'none';
+  document.getElementById('jsonBox').querySelector('.copy-btn').textContent = 'Copy';
+}
+
+function copyJSON() {
+  navigator.clipboard.writeText(JSON.stringify(tools, null, 2)).then(() => {
+    document.getElementById('jsonMsg').style.display = 'block';
+    document.getElementById('jsonBox').querySelector('.copy-btn').textContent = '✓';
+  });
+}
+
+loadTools();
+</script>
+</body>
+</html>
